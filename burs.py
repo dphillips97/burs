@@ -5,6 +5,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import re
 
+REGEX = r'(.*)\n(\d\.\d+%).*\n(\w+)\s*\n\$(\d\.\d+)'
+# volume dict
+vol_dict = {}
+
 # Set Chromedriver options
 # info from this website:
 # https://sqa.stackexchange.com/questions/26051/chrome-driver-2-28-chrome-is-being-controlled-by-automated-test-software-noti
@@ -19,7 +23,27 @@ browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_option
 url = 'https://hopcat.com/beer/royal-oak'
 browser.get(url)
 
-p_list = browser.find_elements_by_tag_name('div')
+# get all div objects
+elems = browser.find_elements_by_class_name('beer-details')
 
-for i in p_list:
-	print(i.text)
+
+with open('burs.txt', 'w') as f:
+	for elem in elems:	
+		elem_doc = elem.text
+		
+		prog = re.compile(REGEX)
+		
+		try:
+		
+			mo = prog.match(elem_doc)
+		
+			called = mo.group(1)
+			abv = mo.group(2)
+			vol = mo.group(3)
+			price = mo.group(4)
+			
+			f.write('%s, %s, %s, %s\n\n' % (called, abv, vol, price))
+		
+		except:
+			
+			pass
