@@ -10,12 +10,12 @@ REGEX = r'(.*)\n(\d\.\d+)%.*\n(\w+)\s*\n\$(\d\.\d+)'
 
 # volume dict to match word values to mL values
 vol_dict = { 'Lager': 591,
-			'Pint': 473,
-			'Tulip': 300, #check
-			'Weizen': 500,
-			'Snifter': 200, #check 
-			'Wine': 175 # check
-			}
+		'Pint': 473,
+		'Tulip': 300, #check
+		'Weizen': 500,
+		'Snifter': 200, #check 
+		'Wine': 175 # check
+}
 			
 results_dict = {}
 
@@ -30,7 +30,7 @@ chrome_options.add_argument('--disable-infobars')
 browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_options = chrome_options)
 
 # Get page object
-url = 'https://hopcat.com/beer/royal-oak'
+url = r'https://hopcat.com/beer/royal-oak'
 browser.get(url)
 
 # get all div objects of class 'beer-details'
@@ -70,7 +70,6 @@ with open('burs.txt', 'w') as f:
 			
 			results_dict[called] = vi
 		except:
-			
 			pass
 
 max_value = max(results_dict.values())
