@@ -5,9 +5,19 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import re
 
-REGEX = r'(.*)\n(\d\.\d+%).*\n(\w+)\s*\n\$(\d\.\d+)'
-# volume dict
-vol_dict = {}
+# matches details in each beer entry 
+REGEX = r'(.*)\n(\d\.\d+)%.*\n(\w+)\s*\n\$(\d\.\d+)'
+
+# volume dict to match word values to mL values
+vol_dict = { 'Lager': 591,
+			'Pint': 473,
+			'Tulip': 300, #check
+			'Weizen': 500,
+			'Snifter': 200, #check 
+			'Wine': 175 # check
+			}
+			
+results_dict = {}
 
 # Set Chromedriver options
 # info from this website:
@@ -23,9 +33,8 @@ browser = webdriver.Chrome(executable_path = path_to_chromedriver, chrome_option
 url = 'https://hopcat.com/beer/royal-oak'
 browser.get(url)
 
-# get all div objects
+# get all div objects of class 'beer-details'
 elems = browser.find_elements_by_class_name('beer-details')
-
 
 with open('burs.txt', 'w') as f:
 	for elem in elems:	
@@ -36,14 +45,35 @@ with open('burs.txt', 'w') as f:
 		try:
 		
 			mo = prog.match(elem_doc)
-		
-			called = mo.group(1)
-			abv = mo.group(2)
-			vol = mo.group(3)
-			price = mo.group(4)
 			
-			f.write('%s, %s, %s, %s\n\n' % (called, abv, vol, price))
+			# get name of beer
+			called = mo.group(1)
+			
+			# get abv
+			abv = float(mo.group(2))
+			abv_pct = abv / 100
+			
+			# get vol, have to take multiple steps(?)
+			vol = mo.group(3)
+			vol = vol_dict[vol]
+			vol_num = float(vol)
+			
+			# get price
+			price = float(mo.group(4))
+			
+			# calculate value index
+			vi = float(abv_pct * vol / price)
+			
+			#f.write('%s, %2f, %2f, %2f, %2f\n\n' % (called, abv_pct, vol_num, price, vi))
 		
+			f.write('%s: %2f\n' % (called, vi))
+			
+			results_dict[called] = vi
 		except:
 			
 			pass
+
+max_value = max(results_dict.values())
+max_keys = [k for k, v in results_dict.items() if v == max_value]
+print(max_value, max_keys)
+	
